@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agency & Candidate Pipeline · ExDev · Supercell</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.16);
+    --text: #1a1917;
+    --text-2: #6b6963;
+    --text-3: #a09d97;
+    --accent: #1a1917;
+    --blue-bg: #e8f0fc; --blue-text: #1a4b9c;
+    --amber-bg: #fef3dc; --amber-text: #92600a;
+    --purple-bg: #eeebfd; --purple-text: #4b3db5;
+    --green-bg: #e6f4ea; --green-text: #1e6e3c;
+    --teal-bg: #e0f5ef; --teal-text: #0d6e52;
+    --red-bg: #fdecea; --red-text: #9b2218;
+    --preferred-bg: #e6f4ea; --preferred-text: #1e6e3c;
+    --active-bg: #e8f0fc; --active-text: #1a4b9c;
+    --review-bg: #fdecea; --review-text: #9b2218;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Layout */
+  .app { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* Header */
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+  .header-left {}
+  .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .logo-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; color: var(--text-2); text-transform: uppercase; }
+  h1 { font-size: 26px; font-weight: 500; letter-spacing: -.02em; color: var(--text); }
+  .header-meta { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .date-badge { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-3); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 10px; }
+
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.1rem; transition: border-color .15s; }
+  .metric:hover { border-color: var(--border-strong); }
+  .metric-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; font-family: 'DM Mono', monospace; }
+  .metric-value { font-size: 28px; font-weight: 300; color: var(--text); margin-top: 4px; letter-spacing: -.03em; }
+  .metric-value.warn { color: #92600a; }
+  .metric-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  /* Card */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 1.25rem; }
+  .tab { font-size: 13px; font-weight: 400; padding: 12px 14px; cursor: pointer; color: var(--text-2); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; gap: 8px; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .search { flex: 1; min-width: 200px; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 11px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
+  .search::placeholder { color: var(--text-3); }
+  .search:focus { border-color: var(--border-strong); background: var(--surface); }
+  .pill-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .pill-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .pill-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); font-weight: 400; text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 12px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .1s; }
+  tbody tr:hover { background: var(--bg); }
+  .name-cell { font-weight: 500; white-space: nowrap; }
+  .muted { color: var(--text-2); }
+  .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; font-family: 'DM Mono', monospace; letter-spacing: .02em; }
+  .b-submitted { background: var(--blue-bg); color: var(--blue-text); }
+  .b-reviewed { background: var(--amber-bg); color: var(--amber-text); }
+  .b-interview { background: var(--purple-bg); color: var(--purple-text); }
+  .b-offer { background: var(--green-bg); color: var(--green-text); }
+  .b-onboarded { background: var(--teal-bg); color: var(--teal-text); }
+  .b-rejected { background: var(--red-bg); color: var(--red-text); }
+  .agency-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--radius); background: var(--surface2); color: var(--text-2); border: 1px solid var(--border); font-family: 'DM Mono', monospace; }
+  .b-preferred { background: var(--preferred-bg); color: var(--preferred-text); }
+  .b-active { background: var(--active-bg); color: var(--active-text); }
+  .b-review { background: var(--review-bg); color: var(--review-text); }
+
+  /* Tick / cross */
+  .tick { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; }
+  .tick-yes { background: var(--green-bg); color: var(--green-text); }
+  .tick-no { background: var(--surface2); color: var(--text-3); }
+
+  /* Stars */
+  .stars { color: #d4a017; font-size: 13px; letter-spacing: -1px; }
+  .stars-empty { color: var(--border-strong); font-size: 13px; letter-spacing: -1px; }
+
+  /* Expiry */
+  .expiry-warn { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--amber-text); background: var(--amber-bg); padding: 2px 7px; border-radius: var(--radius); }
+  .expiry-ok { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-2); }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-3); font-size: 13px; }
+
+  /* Add row button */
+  .add-row { display: flex; align-items: center; gap: 8px; padding: .75rem 1.25rem; font-size: 13px; color: var(--text-3); border-top: 1px solid var(--border); cursor: pointer; transition: background .1s, color .1s; }
+  .add-row:hover { background: var(--bg); color: var(--text-2); }
+  .add-icon { width: 18px; height: 18px; border-radius: 50%; border: 1px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 14px; line-height: 1; color: var(--text-3); }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 1.5rem; width: 420px; max-width: 95vw; }
+  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; }
+  .form-row { margin-bottom: 1rem; }
+  .form-row label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 5px; }
+  .form-row input, .form-row select { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); outline: none; }
+  .form-row input:focus, .form-row select:focus { border-color: var(--border-strong); background: var(--surface); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; }
+  .btn { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 16px; border-radius: var(--radius); cursor: pointer; transition: all .15s; }
+  .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text-2); }
+  .btn-ghost:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-primary { background: var(--text); border: 1px solid var(--text); color: #fff; }
+  .btn-primary:hover { opacity: .85; }
+
+  /* Legend */
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; padding: .75rem 1.25rem; border-top: 1px solid var(--border); }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-3); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (max-width: 700px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-row">
+        <div class="logo-dot"></div>
+        <span class="logo-label">ExDev · Sourcing</span>
+      </div>
+      <h1>Agency &amp; Candidate Pipeline</h1>
+      <div class="header-meta">Freelancer tracking &amp; agency performance · Supercell</div>
+    </div>
+    <div class="header-right">
+      <div class="date-badge" id="date-badge"></div>
+    </div>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('candidates', this)">Candidates</div>
+      <div class="tab" onclick="switchTab('agencies', this)">Agency performance</div>
+    </div>
+
+    <!-- CANDIDATES VIEW -->
+    <div id="view-candidates">
+      <div class="toolbar">
+        <input class="search" type="text" placeholder="Search name, role or agency..." id="search-input" oninput="renderCandidates()" />
+        <button class="pill-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="pill-btn" onclick="setFilter('Submitted', this)">Submitted</button>
+        <button class="pill-btn" onclick="setFilter('Reviewed', this)">Reviewed</button>
+        <button class="pill-btn" onclick="setFilter('Interview', this)">Interview</button>
+        <button class="pill-btn" onclick="setFilter('Offer', this)">Offer</button>
+        <button class="pill-btn" onclick="setFilter('Onboarded', this)">Onboarded</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:16%">Candidate</th>
+              <th style="width:15%">Role</th>
+              <th style="width:12%">Agency</th>
+              <th style="width:12%">Status</th>
+              <th style="width:8%">TZ</th>
+              <th style="width:7%;text-align:center">NDA</th>
+              <th style="width:7%;text-align:center">Access</th>
+              <th style="width:14%">Contract end</th>
+              <th style="width:9%">Edit</th>
+            </tr>
+          </thead>
+          <tbody id="candidates-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="candidates-empty" style="display:none">No candidates match this filter.</div>
+      <div class="add-row" onclick="openAddModal()">
+        <div class="add-icon">+</div>
+        Add candidate
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#1a4b9c"></span>Submitted</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#92600a"></span>Reviewed</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#4b3db5"></span>Interview</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#1e6e3c"></span>Offer</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#0d6e52"></span>Onboarded</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#9b2218"></span>Rejected</span>
+      </div>
+    </div>
+
+    <!-- AGENCIES VIEW -->
+    <div id="view-agencies" style="display:none">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:20%">Agency</th>
+              <th style="width:10%">Active ICs</th>
+              <th style="width:10%">Submitted</th>
+              <th style="width:10%">Hired</th>
+              <th style="width:13%">Hit rate</th>
+              <th style="width:15%">Avg. response</th>
+              <th style="width:12%">Rating</th>
+              <th style="width:10%">Status</th>
+            </tr>
+          </thead>
+          <tbody id="agencies-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h2>Add candidate</h2>
+    <div class="form-row">
+      <label>Full name</label>
+      <input type="text" id="f-name" placeholder="e.g. Sofia Moreau" />
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Role</label>
+        <input type="text" id="f-role" placeholder="e.g. 3D Animator" />
+      </div>
+      <div class="form-row">
+        <label>Agency</label>
+        <select id="f-agency">
+          <option>TalentForge</option>
+          <option>CreativeLab</option>
+          <option>PixelStaff</option>
+          <option>GameCrew</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Status</label>
+        <select id="f-status">
+          <option>Submitted</option>
+          <option>Reviewed</option>
+          <option>Interview</option>
+          <option>Offer</option>
+          <option>Onboarded</option>
+          <option>Rejected</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Timezone</label>
+        <select id="f-tz">
+          <option>GMT</option><option>CET</option><option>EET</option>
+          <option>IST</option><option>JST</option><option>EST</option>
+          <option>PST</option><option>WAT</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>NDA signed</label>
+        <select id="f-nda"><option value="1">Yes</option><option value="0">No</option></select>
+      </div>
+      <div class="form-row">
+        <label>System access</label>
+        <select id="f-access"><option value="1">Granted</option><option value="0">Pending</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Contract end date</label>
+      <input type="date" id="f-end" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="addCandidate()">Add candidate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const statusClass = {
+    Submitted:'b-submitted', Reviewed:'b-reviewed', Interview:'b-interview',
+    Offer:'b-offer', Onboarded:'b-onboarded', Rejected:'b-rejected'
+  };
+
+  let activeFilter = 'all';
+  let activeTab = 'candidates';
+
+  let candidates = [
+    {id:1, name:'Marta Kovalenko',  role:'3D Animator',        agency:'TalentForge', status:'Onboarded', tz:'CET', nda:true,  access:true,  end:'2025-09-14'},
+    {id:2, name:'James Osei',       role:'FX Artist',           agency:'CreativeLab', status:'Interview', tz:'GMT', nda:true,  access:false, end:null},
+    {id:3, name:'Priya Nair',       role:'Concept Artist',      agency:'PixelStaff', status:'Submitted', tz:'IST', nda:false, access:false, end:null},
+    {id:4, name:'Lukas Bauer',      role:'Tech Artist',         agency:'TalentForge',status:'Reviewed',  tz:'CET', nda:true,  access:false, end:null},
+    {id:5, name:'Sofia Moreau',     role:'UI Artist',           agency:'GameCrew',   status:'Offer',     tz:'CET', nda:true,  access:false, end:null},
+    {id:6, name:'Kenji Yamamoto',   role:'Animator',            agency:'CreativeLab',status:'Onboarded', tz:'JST', nda:true,  access:true,  end:'2025-07-30'},
+    {id:7, name:'Amara Diallo',     role:'Rigger',              agency:'PixelStaff', status:'Rejected',  tz:'WAT', nda:false, access:false, end:null},
+    {id:8, name:'Tobias Renz',      role:'3D Animator',         agency:'GameCrew',   status:'Interview', tz:'CET', nda:true,  access:false, end:null},
+    {id:9, name:'Elena Vasquez',    role:'VFX Artist',          agency:'TalentForge',status:'Submitted', tz:'CET', nda:false, access:false, end:null},
+    {id:10,name:'Niall Brennan',    role:'Environment Artist',  agency:'CreativeLab',status:'Onboarded', tz:'GMT', nda:true,  access:true,  end:'2025-10-01'},
+  ];
+
+  const agencies = [
+    {name:'TalentForge', active:3, submitted:12, hired:5, response:'< 4 hrs',   rating:5, status:'preferred'},
+    {name:'CreativeLab', active:2, submitted:9,  hired:3, response:'< 8 hrs',   rating:4, status:'active'},
+    {name:'PixelStaff',  active:1, submitted:7,  hired:1, response:'24–48 hrs', rating:2, status:'review'},
+    {name:'GameCrew',    active:2, submitted:5,  hired:2, response:'< 12 hrs',  rating:3, status:'active'},
+  ];
+
+  let nextId = 11;
+
+  function today() {
+    return new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  }
+
+  function initDateBadge() {
+    document.getElementById('date-badge').textContent = today();
+  }
+
+  function tick(v) {
+    return v
+      ? '<span class="tick tick-yes">✓</span>'
+      : '<span class="tick tick-no">○</span>';
+  }
+
+  function stars(n) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) {
+      s += i <= n
+        ? '<span class="stars">★</span>'
+        : '<span class="stars-empty">★</span>';
+    }
+    return s;
+  }
+
+  function formatEnd(d) {
+    if (!d) return '<span style="color:var(--text-3)">—</span>';
+    const dt = new Date(d);
+    const now = new Date();
+    const diff = Math.ceil((dt - now) / (1000 * 60 * 60 * 24));
+    const str = dt.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+    if (diff > 0 && diff <= 45) {
+      return `<span class="expiry-warn">${str} · ${diff}d left</span>`;
+    }
+    return `<span class="expiry-ok">${str}</span>`;
+  }
+
+  function updateMetrics() {
+    const total = candidates.length;
+    const onboarded = candidates.filter(c => c.status === 'Onboarded').length;
+    const inPipeline = candidates.filter(c => ['Submitted','Reviewed','Interview','Offer'].includes(c.status)).length;
+    const expiring = candidates.filter(c => {
+      if (!c.end) return false;
+      const diff = Math.ceil((new Date(c.end) - new Date()) / (1000*60*60*24));
+      return diff > 0 && diff <= 45;
+    }).length;
+
+    document.getElementById('metrics').innerHTML = `
+      <div class="metric">
+        <div class="metric-label">Total candidates</div>
+        <div class="metric-value">${total}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Active freelancers</div>
+        <div class="metric-value">${onboarded}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">In pipeline</div>
+        <div class="metric-value">${inPipeline}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Expiring soon</div>
+        <div class="metric-value ${expiring > 0 ? 'warn' : ''}">${expiring}</div>
+        <div class="metric-sub">${expiring > 0 ? 'Review contracts' : 'All clear'}</div>
+      </div>
+    `;
+  }
+
+  function renderCandidates() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const rows = candidates.filter(c => {
+      const matchStatus = activeFilter === 'all' || c.status === activeFilter;
+      const matchQ = !q || c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q) || c.agency.toLowerCase().includes(q);
+      return matchStatus && matchQ;
+    });
+
+    const tbody = document.getElementById('candidates-tbody');
+    const empty = document.getElementById('candidates-empty');
+
+    if (!rows.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = rows.map(c => `
+      <tr>
+        <td class="name-cell">${c.name}</td>
+        <td class="muted">${c.role}</td>
+        <td><span class="agency-tag">${c.agency}</span></td>
+        <td><span class="badge ${statusClass[c.status]}">${c.status}</span></td>
+        <td class="mono muted">${c.tz}</td>
+        <td style="text-align:center">${tick(c.nda)}</td>
+        <td style="text-align:center">${tick(c.access)}</td>
+        <td>${formatEnd(c.end)}</td>
+        <td>
+          <select class="agency-tag" style="cursor:pointer;border:none;background:var(--surface2);font-family:DM Sans,sans-serif;font-size:11px;padding:2px 6px;border-radius:6px;color:var(--text-2)" onchange="updateStatus(${c.id}, this.value)">
+            ${['Submitted','Reviewed','Interview','Offer','Onboarded','Rejected'].map(s => `<option ${s===c.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function updateStatus(id, newStatus) {
+    const c = candidates.find(x => x.id === id);
+    if (c) { c.status = newStatus; updateMetrics(); renderCandidates(); }
+  }
+
+  function renderAgencies() {
+    const statusLabel = {preferred:'Preferred', active:'Active', review:'Needs review'};
+    const statusBadge = {preferred:'b-preferred', active:'b-active', review:'b-review'};
+    document.getElementById('agencies-tbody').innerHTML = agencies.map(a => {
+      const hitRate = Math.round((a.hired / a.submitted) * 100);
+      return `
+        <tr>
+          <td class="name-cell">${a.name}</td>
+          <td>${a.active}</td>
+          <td>${a.submitted}</td>
+          <td>${a.hired}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:4px;border-radius:2px;background:var(--surface2);overflow:hidden">
+                <div style="width:${hitRate}%;height:100%;background:#1a1917;border-radius:2px"></div>
+              </div>
+              <span class="mono muted">${hitRate}%</span>
+            </div>
+          </td>
+          <td class="mono muted">${a.response}</td>
+          <td>${stars(a.rating)}</td>
+          <td><span class="badge ${statusBadge[a.status]}">${statusLabel[a.status]}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function setFilter(f, el) {
+    activeFilter = f;
+    document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderCandidates();
+  }
+
+  function switchTab(tab, el) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('view-candidates').style.display = tab === 'candidates' ? 'block' : 'none';
+    document.getElementById('view-agencies').style.display = tab === 'agencies' ? 'block' : 'none';
+  }
+
+  function openAddModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+  }
+
+  function addCandidate() {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { alert('Please enter a name.'); return; }
+    candidates.push({
+      id: nextId++,
+      name,
+      role: document.getElementById('f-role').value.trim() || '—',
+      agency: document.getElementById('f-agency').value,
+      status: document.getElementById('f-status').value,
+      tz: document.getElementById('f-tz').value,
+      nda: document.getElementById('f-nda').value === '1',
+      access: document.getElementById('f-access').value === '1',
+      end: document.getElementById('f-end').value || null,
+    });
+    closeModalDirect();
+    updateMetrics();
+    renderCandidates();
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-role').value = '';
+    document.getElementById('f-end').value = '';
+  }
+
+  initDateBadge();
+  updateMetrics();
+  renderCandidates();
+  renderAgencies();
+</script>
+</body>
+</html>
